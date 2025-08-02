@@ -5,8 +5,10 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity
 )
+from infrastructure.models.user.user import User
 from services.user_service import UserService
 from api.schemas.user_schema import UserSchema
+from infrastructure.databases.base import db
 
 # Khởi tạo Blueprint với prefix "/auth"
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')

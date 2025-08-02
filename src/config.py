@@ -8,7 +8,11 @@ class Config:
     DEBUG = os.environ.get('DEBUG', 'False').lower() in ['true', '1']
     TESTING = os.environ.get('TESTING', 'False').lower() in ['true', '1']
     DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///default.db'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI') or 'sqlite:////app/instance/db.sqlite3'
+    basedir = os.path.abspath(os.path.dirname(__file__))  # src/
+    db_path = os.path.join(basedir, 'default.db')
+
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{db_path}'
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True  # Log SQL queries
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'super-secret-key'
