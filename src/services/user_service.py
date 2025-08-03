@@ -15,9 +15,10 @@ class UserService:
         """Get a user by email"""
         return self.repository.get_by_email(email)
     
-    def create_user(self, email, password):
+    def create_user(self, email, password, role='user'):
         """Create a new user"""
         user = User(email=email)
+        user.role = role  # Set role after creation
         user.set_password(password)
         return self.repository.create(user)
     

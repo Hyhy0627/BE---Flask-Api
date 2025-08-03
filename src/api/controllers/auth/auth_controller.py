@@ -23,13 +23,13 @@ def register():
     data = request.json
     email = data.get('email')
     password = data.get('password')
-
+    role = data.get('role', 'user')
     # Kiểm tra nếu email đã tồn tại
     if user_service.get_user_by_email(email):
         return jsonify({'message': 'Email đã được sử dụng'}), 400
 
     # Tạo user mới
-    user = user_service.create_user(email, password)
+    user = user_service.create_user(email, password, role)
 
     return user_schema.dump(user), 201
 
@@ -58,6 +58,7 @@ def login():
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
+
     user_id = get_jwt_identity()
     new_access_token = create_access_token(identity=str(user_id))
     return jsonify({'access_token': new_access_token})

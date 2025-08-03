@@ -13,7 +13,7 @@ def init_db():
         
         # Kiểm tra và tạo admin user nếu chưa tồn tại
         if not User.query.filter_by(email="admin@example.com").first():
-            admin = User(email="admin@example.com")
+            admin = User(email="admin@example.com", role="admin")
             admin.set_password("admin123")
             db.session.add(admin)
             db.session.commit()
