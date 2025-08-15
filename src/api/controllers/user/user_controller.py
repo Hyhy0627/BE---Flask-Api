@@ -8,15 +8,16 @@ from services.user_service import UserService
 from api.schemas.user_schema import UserSchema
 from infrastructure.databases.base import db
 from api.middleware import role_required
+from functools import wraps
 
 # Khởi tạo Blueprint với prefix "/auth"
-user_bp = Blueprint('api', __name__)
+user_bp = Blueprint('user', __name__, url_prefix='/users')  # Thay đổi prefix từ /api thành /users
 
 # Service và Schema
 user_service = UserService()
 user_schema = UserSchema()
 
-@user_bp.route('/users', methods=['GET'])
+@user_bp.route('', methods=['GET'])
 @jwt_required()
 @role_required('admin')  # Chỉ admin mới được xem danh sách user
 def list_users():
@@ -25,14 +26,15 @@ def list_users():
                         #    "username": u.username,
                            "email": u.email, "role": u.role } for u in users])
 
-@user_bp.route('/users/<int:user_id>', methods=['GET'])
+@user_bp.route('/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user(user_id):
 
     user = User.query.get_or_404(user_id)
     return jsonify(user_schema.dump(user))
 
-@user_bp.route('/users', methods=['POST'])
+@user_bp.route('', methods=['POST'])
+
 @jwt_required()
 def create_user():
     data = request.json
@@ -54,7 +56,7 @@ def create_user():
     except Exception as e:
         return jsonify(msg=str(e)), 400
 
-@user_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@user_bp.route('/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
     
@@ -64,7 +66,7 @@ def delete_user(user_id):
     return jsonify(msg="User deleted")
 
 # CẬP NHẬT THÔNG TIN NGƯỜI DÙNG
-@user_bp.route('/users/<int:user_id>', methods=['PUT'])
+@user_bp.route('/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
     current_user_id = int(get_jwt_identity())
@@ -84,3 +86,21 @@ def update_user(user_id):
 
     db.session.commit()
     return jsonify(msg="User updated", user={"id": user.id, "username": user.username})
+
+#router chỉ cho admin truy cập
+@user_bp.route('/admin-only', methods=['GET'])
+@role_required('admin')
+def admin_only():
+    return jsonify({'message': 'Chào admin!'})
+
+#router chỉ có giáo viên truy cập 
+@user_bp.route('/teacher-only', methods=['GET'])
+@role_required('teacher')
+def teacher_only():
+    return jsonify({'message': 'Chào giáo viên!'})
+
+#user chỉ có học sinh/sinh viên truy cập
+@user_bp.route('/student-only', methods=['GET'])
+@role_required('student')
+def student_only():
+    return jsonify({'message': 'Chào học student!'})

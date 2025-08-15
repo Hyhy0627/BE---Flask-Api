@@ -2,7 +2,7 @@
 
 from flask import request, jsonify
 from flask_cors import CORS
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from functools import wraps
 from services.user_service import UserService
 
@@ -42,14 +42,15 @@ def setup_middleware(app):
     def options_route():
         return handle_options_request()
 
-def role_required(required_role):
+def role_required(*roles):
     def decorator(fn):
         @wraps(fn)
+        @jwt_required()
         def wrapper(*args, **kwargs):
             user_id = get_jwt_identity()
             user = UserService().get_user_by_id(user_id)
-            if not user or user.role != required_role:
-                return {'message': 'Forbidden'}, 403
+            if not user or user.role not in roles:
+                return jsonify({'message': 'Không có quyền truy cập'}), 403
             return fn(*args, **kwargs)
         return wrapper
     return decorator
